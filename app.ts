@@ -1,5 +1,8 @@
 import { Hono } from "https://deno.land/x/hono@v3.12.0/mod.ts";
-import { serveStatic } from "https://deno.land/x/hono@v3.12.0/middleware.ts";
+import {
+  cors,
+  serveStatic,
+} from "https://deno.land/x/hono@v3.12.0/middleware.ts";
 import { streamSSE } from "https://deno.land/x/hono@v3.12.0/helper.ts";
 
 const db = await Deno.openKv();
@@ -12,6 +15,7 @@ interface LastVisit {
   flag: string;
 }
 
+app.use(cors());
 app.get("/", serveStatic({ path: "./index.html" }));
 
 app.post("/visit", async (c) => {
@@ -45,23 +49,5 @@ app.get("/visit", (c) => {
     }
   });
 });
-// app.get("/counter", (c) => {
-//   return streamSSE(c, async (stream) => {
-//     const visitsKey = ["visits"];
-//     const listOfKeysToWatch = [visitsKey];
-//     const watcher = db.watch(listOfKeysToWatch);
-
-//     for await (const entry of watcher) {
-//       const { value } = entry[0];
-//       if (value != null) {
-//         await stream.writeSSE({
-//           data: Number(value).toString(),
-//           event: "update",
-//           id: String(i++),
-//         });
-//       }
-//     }
-//   });
-// });
 
 Deno.serve(app.fetch);
